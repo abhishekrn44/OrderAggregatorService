@@ -1,0 +1,35 @@
+server:
+  port: 9000
+
+logging:
+  level:
+    root: INFO
+    io.abhishek: DEBUG 
+    
+server.error.include-message: always
+
+app:
+  order-service:
+    host: localhost
+    port: 9001
+  tracker-service:
+    host: localhost
+    port: 9002
+
+---
+   
+spring.config.activate.on-profile: docker
+
+server:
+ port: 8080
+
+app:
+  product-service:
+    host: product
+    port: 8080
+  recommendation-service:
+    host: recommendation
+    port: 8080
+  review-service:
+    host: review
+    port: 8080    
