@@ -38,8 +38,8 @@ public class OrderComposer {
     	    @Value("${app.tracker-service.port}") String trackerServicePort */) {
         this.restTemplate = restTemplate;
         this.mapper = mapper;
-        this.orderServiceUrl = "http://" + "localhost" + ":" + 8080 + "/orderservice/";
-        this.trackerServiceUrl = "http://" + "localhost" + ":" + 8080 + "/tracker?orderId=";
+        this.orderServiceUrl = "http://" + "order" + ":" + 8080 + "/orderservice/";
+        this.trackerServiceUrl = "http://" + "tracker" + ":" + 8080 + "/tracker?orderId=";
     }
     
     
