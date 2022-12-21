@@ -1,13 +1,13 @@
-package io.abhishek.employeeaggservice;
+package io.abhishek.orderaggservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class EmployeeAggServiceApplicationTests {
+class OrderAggServiceApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }

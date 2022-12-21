@@ -1,20 +1,114 @@
 server:
-  port: 9000
+  port: 8080
+  forward-headers-strategy: framework
+  error:
+    include-message: always
 
 logging:
   level:
     root: INFO
     io.abhishek: DEBUG 
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: TRACE
     
-server.error.include-message: always
+spring.application.name: order-agg-service
 
 app:
-  order-service:
-    host: localhost
-    port: 9001
-  tracker-service:
-    host: localhost
-    port: 9002
+    eureka-server: localhost
+    jaeger-host: localhost
+    eureka-username: u
+    eureka-password: p
+    auth-server: localhost
+
+springdoc:
+  swagger-ui.path: /openapi/swagger-ui.html
+  api-docs.path: /openapi/v3/api-docs
+  packagesToScan: io.abhishek.orderaggservice.service
+  pathsToMatch: /**
+  
+  swagger-ui:
+    oauth2-redirect-url: http://localhost:8443/webjars/swagger-ui/oauth2-redirect.html
+    oauth:
+      clientId: reader
+      clientSecret: secret
+      useBasicAuthenticationWithAccessCodeGrant: true
+  oAuthFlow:
+    authorizationUrl: http://localhost:8443/oauth2/authorize
+    tokenUrl: http://localhost:8443/oauth2/token  
+    
+api:
+  common:
+    version: 1.0.0
+    title: Order Tracking API
+    description: It can track your orders effeciently.
+    termsOfService: MY TERMS OF SERVICE
+    license: MY LICENSE
+    licenseUrl: MY LICENSE URL
+
+    contact:
+      name: ABHISHEK RANA
+      url: cruxtech.io
+      email: abhishekrn44@gmail.com
+
+  responseCodes:
+    ok.description: OK
+    badRequest.description: Bad Request, invalid format of the request. See response message for more information
+    notFound.description: Not found, the specified id does not exist
+    unprocessableEntity.description: Unprocessable entity, input parameters caused the processing to fail. See response message for more information
+    
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${app.eureka-username}:${app.eureka-password}@${app.eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5    
+        
+spring.security.oauth2.resourceserver.jwt.issuer-uri: http://${app.auth-server}:9999
+
+resilience4j.circuitbreaker:
+  instances:
+    order-agg-service:
+      allowHealthIndicatorToFail: false
+      registerHealthIndicator: true
+      slidingWindowType: count-based
+      slidingWindowSize: 5
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
+      permittedNumberOfCallsInHalfOpenState: 3
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      ignoreExceptions:
+        - io.abhishek.exceptions.InvalidInputException
+        - io.abhishek.exceptions.NotFoundException
+        
+resilience4j.timelimiter:
+  instances:
+    order-agg-service:
+      timeoutDuration: 2s
+
+resilience4j.retry:
+  instances:
+    order-agg-service:
+      maxAttempts: 3
+      waitDuration: 1000
+      retryExceptions:
+      - org.springframework.web.client.HttpServerErrorException$InternalServerError       
+      
+management:
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+      circuitbreaker:
+        enabled: true
+    web:
+      exposure:
+        include: "*"       
+    
+opentracing:
+  jaeger:
+   http-sender:
+    url: http://${app.jaeger-host}:14268/api/traces        
 
 ---
    
@@ -22,14 +116,11 @@ spring.config.activate.on-profile: docker
 
 server:
  port: 8080
-
+ 
 app:
-  product-service:
-    host: product
-    port: 8080
-  recommendation-service:
-    host: recommendation
-    port: 8080
-  review-service:
-    host: review
-    port: 8080    
+  eureka-server: eureka
+
+opentracing:
+  jaeger:
+   http-sender:
+    url: http://order-agg/api/traces    
